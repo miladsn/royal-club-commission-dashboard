@@ -1,0 +1,46 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: royal-dashboard-app
+    container_name: royal_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - royal-net
+
+  webserver:
+    image: nginx:alpine
+    container_name: royal_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - royal-net
+
+  db:
+    image: mysql:8.0
+    container_name: royal_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: royal_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - royal-net
+
+volumes:
+  dbdata:
+
+networks:
+  royal-net:
+    driver: bridge
